@@ -8,6 +8,8 @@ import {
 } from '../redux/store';
 import { updateOrderThunk, updateProductThunk } from '../redux/thunks';
 import { Link } from 'react-router-dom';
+import StripeCheckout from 'react-stripe-checkout';
+import axios from 'axios';
 
 class _Cart extends React.Component {
   constructor(props) {
@@ -24,7 +26,8 @@ class _Cart extends React.Component {
     this.updateOrder = this.updateOrder.bind(this);
     this.updateInventoryFromDelete = this.updateInventoryFromDelete.bind(this);
     this.updateInventoryFromQuantity = this.updateInventoryFromQuantity.bind(this);
-    this.changePage = this.changePage.bind(this)
+    this.changePage = this.changePage.bind(this);
+    this.handleToken = this.handleToken.bind(this);
   }
   async componentDidMount(props) {
     await this.props.setOrders()
@@ -71,6 +74,21 @@ class _Cart extends React.Component {
   }
   updateOrder(cartTotal){
     this.props.updateOrder({...this.state, total: cartTotal })
+  }
+  async handleToken(token){
+    const order = this.props.orders.find(order => order.status==='cart' && order.userId===this.props.match.params.id)
+    console.log('token', token)
+    const response = await axios.post('/api/checkout', {
+      token,
+      order
+    })
+    console.log('response', response)
+    const {status} = response.data;
+    if(status==='success'){
+      console.log('success')
+    } else{
+      console.log('fail')
+    }
   }
   render() {
     const { id, items } = this.state;
@@ -152,7 +170,7 @@ class _Cart extends React.Component {
           </h5>
 
           Please refresh page for accruate portroyal of cart! Thank you!
-          <button
+          {/* <button
             className="btn btn-outline-success"
             onClick={()=> {
               this.updateOrder(Number(totalPrice))
@@ -160,7 +178,12 @@ class _Cart extends React.Component {
             }}
           >
             Proceed to Payment
-          </button>
+          </button> */}
+          <StripeCheckout
+          stripeKey='pk_test_G4F5UhFtJcLZieeW0kr1MQQa00ul9VeIdT'
+          token={this.handleToken}
+          amount={totalPrice*100}
+          name={`Order ID#${id}`}/>
         </div>
       </div>
       );
