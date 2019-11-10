@@ -95,7 +95,7 @@ class _Cart extends React.Component {
     if(status==='success'){
       // this.updateOrder(this.state.total, 'completed')
       toast('Success! Payment went through.', {type: 'success'})
-      this.setState({payment: 'processed'})
+      this.changePage()
     } else{
       toast('Something went wrong!', {type: 'error'})
     }
@@ -110,10 +110,7 @@ class _Cart extends React.Component {
           If you wish to continue to shop, take a look at our {<Link to='/products'>Products</Link>}
         </div>);
     }
-    if(payment === 'processed'){
-      this.completeOrder()
-      this.changePage()
-    }
+
     const totalItems = items.reduce((sum, item) => sum + Number(item.quantity),0 );
     const itemsCount = total => {
       if (total === 1) {
